@@ -100,6 +100,7 @@ var Game = function (_React$Component2) {
       history: [{
         squares: Array(9).fill(null)
       }],
+      stepNumber: 0,
       xIsNext: true
     };
     return _this3;
@@ -108,7 +109,7 @@ var Game = function (_React$Component2) {
   _createClass(Game, [{
     key: "handleClick",
     value: function handleClick(i) {
-      var history = this.state.history;
+      var history = this.state.history.slice(0, this.state.stepNumber + 1);
       var current = history[history.length - 1];
       var squares = current.squares.slice();
       // ignore the clicks if someone has won the game or if a Square is already filled.
@@ -117,10 +118,20 @@ var Game = function (_React$Component2) {
       }
       squares[i] = this.state.xIsNext ? 'X' : 'O';
       this.setState({
+        // append new squares to history
         history: history.concat([{
           squares: squares
         }]),
+        stepNumber: history.length,
         xIsNext: !this.state.xIsNext
+      });
+    }
+  }, {
+    key: "jumpTo",
+    value: function jumpTo(step) {
+      this.setState({
+        stepNumber: step,
+        xIsNext: step % 2 === 0
       });
     }
   }, {
@@ -129,14 +140,15 @@ var Game = function (_React$Component2) {
       var _this4 = this;
 
       var history = this.state.history;
-      var current = history[history.length - 1];
+      var current = history[this.state.stepNumber];
       var winner = calculateWinner(current.squares);
 
       var moves = history.map(function (strp, move) {
+        // desc is description, at first move is 0, which is true, all other cases move is false.
         var desc = move ? 'Go to move #' + move : 'Go to move start';
         return React.createElement(
           "li",
-          null,
+          { key: move },
           React.createElement(
             "button",
             { onClick: function onClick() {
